@@ -68,7 +68,7 @@ pipeline {
             steps {
               sh """
                  echo "---------------Scanning Docker Image-----------"
-                 trivy image priya123456/myjavaapp:"${App_Version}" .
+                 trivy image priya123456/myjavaapp:"${App_Version}"
                  echo "---------------Completed Scanning Docker Image-----------"
                  """
            }  
