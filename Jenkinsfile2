@@ -6,6 +6,11 @@ stages{
            echo "Checkout done"
       }
    }
+stage("Building the application"){
+     steps {
+           echo "building java application"
+      }
+   }
 }
 
 }
