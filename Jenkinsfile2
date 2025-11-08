@@ -1,41 +1,54 @@
 pipeline {
- agent any
-stages{
-   stage("checkout"){
-     steps {
-           sh """
-           echo "Checkout done - $PWD"
-           ls -l
-           """
+    agent any
 
-      }
-   }
-stage("Building the application"){
-     steps {
-         sh """
-           echo "building java application"
-           mvn clean package
-           echo  "========Building Java Application Completed======"
-         """
-      }
-   }
-stage("Testing the application"){
-     steps {
-         sh """
-           echo "Testing java application"
-           mvn test
-           echo  "========Testing Java Application Completed======"
-         """
-      }
-   }stage("Building the Docker Image"){
-     steps {
-         sh """
-           echo "building the "
-           mvn clean package
-           echo  "========Building Java Application Completed======"
-         """
-      }
-   }
-}
+    stages {
 
+        stage("Checkout") {
+            steps {
+                sh """
+                echo "Checkout done - $PWD"
+                ls -l
+                """
+            }
+        }
+
+        stage("Building the application") {
+            steps {
+                sh """
+                echo "Building Java application"
+                mvn clean package
+                echo "======== Building Java Application Completed ======"
+                """
+            }
+        }
+
+        stage("Testing the application") {
+            steps {
+                sh """
+                echo "Testing Java application"
+                mvn test
+                echo "======== Testing Java Application Completed ======"
+                """
+            }
+        }
+
+        stage("Building the Docker Image") {
+            steps {
+                sh """
+                echo "Building Docker Image"
+                docker build -t java-app:latest .
+                echo "======== Docker Image Build Completed ======"
+                """
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline completed successfully!"
+        }
+        failure {
+            echo "Pipeline failed!"
+        }
+    }
 }
