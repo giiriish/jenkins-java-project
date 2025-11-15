@@ -1,12 +1,5 @@
 pipeline {
  agent any
-
-environment {
-        IMAGE_NAME = 'priya123456/restapi'
-        CONTAINER_NAME = 'restapi-container'
-        PORT_MAPPING = '8081:7000'  // hostPort:containerPort
-    }
-
 stages{
    stage("checkout"){
      steps {
@@ -26,27 +19,33 @@ stage("Building the application"){
          """      
       }
    }
-
-  stage("Testing the application"){
+stage("Testing the application"){
      steps {
          sh """
            echo "========Testing Java Application============"
            mvn test
-           echo "====== Testing Java Application completed====="
+           echo "======Testing Java Application completed====="
          """      
       }
    }
-
-   stage("Building the Docker Image"){
+stage("Building the Docker Image"){
+     steps {
+         sh """
+           echo "========Building the Docker Image============"
+           mvn test
+           echo "====== Building Image  completed====="
+         """      
+      }
+stage("Building the Docker Image"){
      steps {
          sh """
            echo "========Building the Docker Image ============"
-            docker build -t $IMAGE_NAME .
+            docker build -t $girish .
            echo "====== Building Image Completed ====="
          """      
       }
    }
-
+   }
 } // end of stages
 
 } // end of pipeline
