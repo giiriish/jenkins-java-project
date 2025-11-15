@@ -1,51 +1,79 @@
 pipeline {
- agent any
-stages{
-   stage("checkout"){
-     steps {
-           sh """
-           echo "Checkout done - $PWD"
-           ls -l
-           """
-      }
-   }
+    agent any
 
-stage("Building the application"){
-     steps {
-         sh """
-           echo "========Building Java Application============"
-           mvn clean package
-           echo "======Building Java Application completed====="
-         """      
-      }
-   }
-stage("Testing the application"){
-     steps {
-         sh """
-           echo "========Testing Java Application============"
-           mvn test
-           echo "======Testing Java Application completed====="
-         """      
-      }
-   }
-stage("Building the Docker Image"){
-     steps {
-         sh """
-           echo "========Building the Docker Image============"
-           mvn test
-           echo "====== Building Image  completed====="
-         """      
-      }
-stage("Building the Docker Image"){
-     steps {
-         sh """
-           echo "========Building the Docker Image ============"
-            docker build -t $girish .
-           echo "====== Building Image Completed ====="
-         """      
-      }
-   }
-   }
-} // end of stages
+    parameters {
+        string(name: "App_Version", defaultValue: "1.0", description: "Provide application version")
+    }
 
-} // end of pipeline
+    environment {
+        DOCKERHUB_USER = "guru4545"
+        IMAGE_NAME = "myjava"
+    }
+
+    stages {
+
+        stage('Hello') {
+            steps {
+                echo 'Hello World1'
+                echo 'Hello World2'
+                echo 'Hello World3'
+                echo 'Hello World4'
+                echo 'Hello World5'
+            }
+        }
+
+        stage('Checkout') {
+            steps {
+                echo "Checkout completed"
+                // checkout scm
+            }
+        }
+
+        stage('Build Application') {
+            steps {
+                sh """
+                    echo "----- Building Application -----"
+                    mvn clean package -DskipTests
+                    echo "----- Build Completed -----"
+                """
+            }
+        }
+
+        stage('Execute Tests') {
+            steps {
+                sh """
+                    echo "----- Running Tests -----"
+                    mvn test
+                    echo "----- Tests Completed -----"
+                """
+            }
+        }
+
+        stage('Acceptance') {
+            steps {
+                echo "Proceed"
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh """
+                    echo "----- Building Docker Image -----"
+                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${App_Version} .
+                    echo "----- Docker Image Created: ${DOCKERHUB_USER}/${IMAGE_NAME}:${App_Version} -----"
+                """
+            }
+        }
+
+        stage('Scan Docker Image') {
+            steps {
+                sh """
+                    echo "----- Scanning Docker Image with Trivy -----"
+                    trivy image ${DOCKERHUB_USER}/${IMAGE_NAME}:${App_Version} > scan.txt
+                    cat scan.txt
+                    echo "----- Scan Completed -----"
+                """
+            }
+        }
+    }
+}
