@@ -1,54 +1,52 @@
 pipeline {
-    agent any
+ agent any
 
-    stages {
-
-        stage("Checkout") {
-            steps {
-                sh """
-                echo "Checkout done - $PWD"
-                ls -l
-                """
-            }
-        }
-
-        stage("Building the application") {
-            steps {
-                sh """
-                echo "Building Java application"
-                mvn clean package
-                echo "======== Building Java Application Completed ======"
-                """
-            }
-        }
-
-        stage("Testing the application") {
-            steps {
-                sh """
-                echo "Testing Java application"
-                mvn test
-                echo "======== Testing Java Application Completed ======"
-                """
-            }
-        }
-
-        stage("Building the Docker Image") {
-            steps {
-                sh """
-                echo "Building Docker Image"
-                docker build -t java-app:latest .
-                echo "======== Docker Image Build Completed ======"
-                """
-            }
-        }
+environment {
+        IMAGE_NAME = 'priya123456/restapi'
+        CONTAINER_NAME = 'restapi-container'
+        PORT_MAPPING = '8081:7000'  // hostPort:containerPort
     }
 
-    post {
-        success {
-            echo "Pipeline completed successfully!"
-        }
-        failure {
-            echo "Pipeline failed!"
-        }
-    }
-}
+stages{
+   stage("checkout"){
+     steps {
+           sh """
+           echo "Checkout done - $PWD"
+           ls -l
+           """
+      }
+   }
+
+stage("Building the application"){
+     steps {
+         sh """
+           echo "========Building Java Application============"
+           mvn clean package
+           echo "======Building Java Application completed====="
+         """      
+      }
+   }
+
+  stage("Testing the application"){
+     steps {
+         sh """
+           echo "========Testing Java Application============"
+           mvn test
+           echo "====== Testing Java Application completed====="
+         """      
+      }
+   }
+
+   stage("Building the Docker Image"){
+     steps {
+         sh """
+           echo "========Building the Docker Image ============"
+            docker build -t $IMAGE_NAME .
+           echo "====== Building Image Completed ====="
+         """      
+      }
+   }
+
+} // end of stages
+
+} // end of pipeline
