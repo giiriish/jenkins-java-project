@@ -59,8 +59,8 @@ pipeline {
             steps {
                 sh """
                     echo "----- Building Docker Image -----"
-                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${App_Version} .
-                    echo "----- Docker Image Created: ${DOCKERHUB_USER}/${IMAGE_NAME}:${App_Version} -----"
+                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${params.App_Version} .
+                    echo "----- Docker Image Created -----"
                 """
             }
         }
@@ -69,7 +69,7 @@ pipeline {
             steps {
                 sh """
                     echo "----- Scanning Docker Image with Trivy -----"
-                    trivy image ${DOCKERHUB_USER}/${IMAGE_NAME}:${App_Version} > scan.txt
+                    trivy image ${DOCKERHUB_USER}/${IMAGE_NAME}:${params.App_Version} > scan.txt
                     cat scan.txt
                     echo "----- Scan Completed -----"
                 """
