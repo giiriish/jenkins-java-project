@@ -8,6 +8,10 @@ pipeline {
     environment {
         DOCKERHUB_USER = "guru4545"
         IMAGE_NAME = "myjava"
+        CONTAINER_NAME = "restapi-container"
+        PORT_MAPPING = "8081:7000"
+        MINIKUBE_IP = "13.235.71.197" // Replace with your EC2 public IP
+        SSH_KEY = "/home/girish/.ssh/my-keypair.pem" // Path to SSH private key for EC2
     }
 
     stages {
@@ -59,7 +63,7 @@ pipeline {
             steps {
                 sh """
                     echo "----- Building Docker Image -----"
-                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${params.App_Version} .
+                    docker build -t ${guru4545}/${myjava}:${params.App_Version} .
                     echo "----- Docker Image Created -----"
                 """
             }
@@ -69,9 +73,29 @@ pipeline {
             steps {
                 sh """
                     echo "----- Scanning Docker Image with Trivy -----"
-                    trivy image ${DOCKERHUB_USER}/${IMAGE_NAME}:${params.App_Version} > scan.txt
+                    trivy image ${DOCKERHUB_USER}/${myjava}:${params.App_Version} > scan.txt
                     cat scan.txt
                     echo "----- Scan Completed -----"
+                """
+            }
+        }
+
+        stage('Deploying on EC2 Minikube Cluster') {
+            steps {
+                sh """
+                    echo "----- Preparing Deployment YAML -----"
+                    envsubst < deployment.yaml > deployment_temp.yaml
+
+                    echo "----- Copying Deployment File to EC2 -----"
+                    scp -i ~/.ssh deployment_temp.yaml ubuntu@${13.235.71.197}:/home/ubuntu/deployment.yaml
+
+                    echo "----- Deleting Existing Deployment (if any) -----"
+                    ssh -i ~/.ssh ubuntu@${13.235.71.197} "kubectl delete -f /home/ubuntu/deployment.yaml --ignore-not-found=true"
+
+                    echo "----- Applying Deployment on Minikube -----"
+                    ssh -i ~/.ssh ubuntu@${13.235.71.197} "kubectl apply -f /home/ubuntu/deployment.yaml"
+
+                    echo "----- Deployment Completed -----"
                 """
             }
         }
